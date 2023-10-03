@@ -9,14 +9,20 @@ export default function StackNavigator() {
     return (
         <Stack.Navigator>
             <Stack.Screen
-                name="Post"
+                name="post"
                 component={Post}
-                options={{ title: 'Post' }}
+                options={{
+                    title: 'Post',
+                    headerTintColor: 'green'
+                }}
             />
             <Stack.Screen
                 name="addPost"
                 component={AddPost}
-                options={{ title: 'AddPost' }}
+                options={{
+                    title: 'AddPost',
+                    headerTintColor: 'green'
+                }}
             />
         </Stack.Navigator>
     );

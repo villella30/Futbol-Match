@@ -11,7 +11,10 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "updates":{
+    "plugins": [
+      "expo-image-picker"
+    ],
+    "updates": {
       "fallbackToCacheTimeout": 0
     },
     "assetBundlePatterns": [

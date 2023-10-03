@@ -5,11 +5,12 @@ import { Entypo } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 
-import StackNavigator from './StackNavigator'
+import StackNavigator from './PostStack'
 import HomeScreen from '../screens/Home/HomeScreen';
 import Community from '../screens/Community/Community';
 import Notification from '../screens/Notification/Notification';
 import Settings from '../screens/Settings/Settings';
+import AccountStack from './AccountStack';
 
 const Tab = createBottomTabNavigator();
 
@@ -64,8 +65,8 @@ export default function MyTabs() {
                         ),
                     }} />
                 <Tab.Screen
-                    name="Settings"
-                    component={Settings}
+                    name="Cuenta"
+                    component={AccountStack}
                     options={{
                         tabBarShowLabel: false,
                         headerTintColor: 'green',

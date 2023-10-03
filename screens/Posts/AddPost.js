@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { View, Text } from "react-native";
 import Toast from 'react-native-easy-toast'
-import AddPostForm from "../../posts/addPostForm";
+import AddPostForm from "./addPostForm";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Loading from "../../components/Loading";
 

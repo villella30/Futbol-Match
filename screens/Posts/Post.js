@@ -1,7 +1,6 @@
 import react from 'react'
 import { StyleSheet, View, Text } from 'react-native';
 import { Icon } from 'react-native-elements'
-import AddPost from './AddPost'
 
 function Post({ navigation }) {
     return (

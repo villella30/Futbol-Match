@@ -18,7 +18,8 @@ const style = StyleSheet.create({
   headerText: {
     textAlign: 'center',
     color: 'white',
-  },
+    marginVertical: 10,
+    },
   searchBar: {
     color: 'black',
     backgroundColor: 'white',
@@ -28,6 +29,7 @@ const style = StyleSheet.create({
     display: 'flex',
     alignSelf: 'center',
     marginTop: 10,
+    marginBottom: 15,
     paddingHorizontal: 10
   },
   posts: {

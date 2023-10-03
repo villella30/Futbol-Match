@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Dimensions, ScrollView, Alert, Text, Image } from "react-native";
 import CountryPicker from "react-native-country-picker-modal";
 import { Avatar, Button, Icon, Input } from "react-native-elements";
-import { map, size, filter, set } from "lodash";
-import { getCurrentLocation, loadImageFromGallery } from "../constants/helpers";
-import Modal from "../components/Modal"
+import { map, size, filter, isEmpty, set } from "lodash";
+import { getCurrentLocation, loadImageFromGallery } from "../../utils/helpers";
+import Modal from "../../components/Modal"
 import MapView, { Marker } from "react-native-maps";
 
 const widthScreen = Dimensions.get("window").width
@@ -15,19 +15,57 @@ export default function AddPostForm({ toastRef, setLoading, navigation }) {
     const [errorDescription, setErrorDescription] = useState(null)
     const [errorAddress, setErrorAddress] = useState(null)
     const [imagesSelected, setImagesSelected] = useState([])
-    const [isVisibleMap, setIsVisibleMap] = useState(false)
-    const [locationField, setLocationField] = useState(null)
+    // const [isVisibleMap, setIsVisibleMap] = useState(false)
+    // const [locationField, setLocationField] = useState(null)
 
 
 
     const AddPost = () => {
-        console.log(formData);
+        if (!validForm()) {
+            return
+        }
         console.log("se subio el post")
     }
+
+    const validForm = () => {
+        clearErrors()
+        let isValid = true;
+
+        if (isEmpty(formData.name)) {
+            setErrorName("Debes ingresar el nombre de la cancha");
+            isValid = false;
+        }
+        if (isEmpty(formData.address)) {
+            setErrorAddress("Debes ingresar la direccion de la cancha");
+            isValid = false;
+        }
+        if (isEmpty(formData.description)) {
+            setErrorDescription("Debes ingresar una descripcion de la cancha");
+            isValid = false;
+        }
+        // if (!locationField) {
+        //     toastRef.current.show("Debes localizar la cancha en el mapa.", 3000);
+        //     isValid = false;
+        // } 
+        if (size(imagesSelected) === 0) {
+            toastRef.current.show("Debes agregar al menos una imagen de la cancha.", 3000);
+            isValid = false;
+        }
+        return isValid;
+    }
+
+    const clearErrors = () => {
+        setErrorDescription(null)
+        setErrorName(null)
+        setErrorAddress(null)
+    }
+
+
+
     return (
         <ScrollView style={styles.containerView}>
-            <ImageRestaurant
-                imageRestaurant={imagesSelected[0]}
+            <ImageField
+                imageCancha={imagesSelected[0]}
             />
             <FormAdd
                 formData={formData}
@@ -35,7 +73,8 @@ export default function AddPostForm({ toastRef, setLoading, navigation }) {
                 errorName={errorName}
                 errorDescription={errorDescription}
                 errorAddress={errorAddress}
-                setIsVisibleMap={setIsVisibleMap}
+                // setIsVisibleMap={setIsVisibleMap}
+                // locationField={locationField}
             />
             <UploadImage
                 toastRef={toastRef}
@@ -47,67 +86,75 @@ export default function AddPostForm({ toastRef, setLoading, navigation }) {
                 onPress={AddPost}
                 buttonStyle={styles.btnAddPost}
             />
-            <MapField
+            {/* <MapField
                 isVisibleMap={isVisibleMap}
                 setIsVisibleMap={setIsVisibleMap}
                 locationField={locationField}
                 setLocationField={setLocationField}
                 toastRef={toastRef}
-            />
+            /> */}
         </ScrollView>
     );
 }
 
-function MapField({ isVisibleMap, setIsVisibleMap, locationField, setLocationField, toastRef }) {
+// function MapField({ isVisibleMap, setIsVisibleMap, locationField, setLocationField, toastRef }) {
+//     const [newRegion, setNewRegion] = useState(null)
 
-    useEffect(() => {
-        (async () => {
-            const response = await getCurrentLocation()
-            if (response.status) {
-                setLocationField(response.location)
-            }
-        })()
-    }, [])
+//     useEffect(() => {
+//         (async () => {
+//             const response = await getCurrentLocation()
+//             if (response.status) {
+//                 setNewRegion(response.location)
+//             }
+//         })()
+//     }, [])
+
+//     const confirmLocation = () => {
+//         setLocationField(newRegion)
+//         toastRef.current.show("Localizacion guardada correctamente", 3000)
+//         setIsVisibleMap(false)
+//     }
 
 
-    return (
-        <Modal isVisible={isVisibleMap} setVisible={setIsVisibleMap}>
-            <View>
-                {
-                    locationField && (
-                        <MapView
-                            style={styles.mapStyle}
-                            initialRegion={locationField}
-                            showsUserLocation={true}
-                            onRegionChange={(region) => setLocationField(region)}
-                        >
-                            <Marker
-                                coordinate={{
-                                    latitude: locationField.latitude,
-                                    longitude: locationField.longitude
-                                }}
-                                draggable
-                            />
-                        </MapView>
-                    )
-                }
-                <View style={styles.viewMapButton} >
-                    <Button
-                        title="Guardar Ubicación"
-                        containerStyle={styles.viewMapBtnContainerSave}
-                        buttonStyle={styles.viewMapBtnSave}
-                    />
-                    <Button
-                        title="Cancelar Ubicación"
-                        containerStyle={styles.viewMapBtnContainerCancel}
-                        buttonStyle={styles.viewMapBtnCancel}
-                        onPress={() => setIsVisibleMap(false)}
-                    />
-                </View>
-            </View>
-        </Modal>
-    );
-}
+//     return (
+//         <Modal isVisible={isVisibleMap} setVisible={setIsVisibleMap}>
+//             <View>
+//                 {
+//                     newRegion && (
+//                         <MapView
+//                             style={styles.mapStyle}
+//                             initialRegion={newRegion}
+//                             showsUserLocation={true}
+//                             onRegionChange={(region) => setNewRegion(region)}
+//                         >
+//                             <Marker
+//                                 coordinate={{
+//                                     latitude: newRegion.latitude,
+//                                     longitude: newRegion.longitude
+//                                 }}
+//                                 draggable
+//                             />
+//                         </MapView>
+//                     )
+//                 }
+//                 <View style={styles.viewMapButton} >
+//                     <Button
+//                         title="Guardar Ubicación"
+//                         containerStyle={styles.viewMapBtnContainerSave}
+//                         buttonStyle={styles.viewMapBtnSave}
+//                         onPress={confirmLocation}
+//                     />
+//                     <Button
+//                         title="Cancelar Ubicación"
+//                         containerStyle={styles.viewMapBtnContainerCancel}
+//                         buttonStyle={styles.viewMapBtnCancel}
+//                         onPress={() => setIsVisibleMap(false)}
+//                     />
+//                 </View>
+//             </View>
+//         </Modal>
+//     );
+// }
 
 function UploadImage({ toastRef, imagesSelected, setImagesSelected }) {
     const imageSelect = async () => {
@@ -173,22 +220,30 @@ function UploadImage({ toastRef, imagesSelected, setImagesSelected }) {
     );
 }
 
-function ImageRestaurant({ imageRestaurant }) {
+function ImageField({ imageCancha }) {
     return (
         <View style={styles.viewPhoto}>
             <Image
                 style={{ width: widthScreen, height: 200 }}
                 source={
-                    imageRestaurant
-                        ? { uri: imageRestaurant }
-                        : require("../assets/no-image-icon-4.png")
+                    imageCancha
+                        ? { uri: imageCancha }
+                        : require("../../assets/no-image-icon-4.png")
                 }
             />
         </View>
     )
 }
 
-function FormAdd({ formData, setFormData, errorName, errorDescription, errorAddress, setIsVisibleMap }) {
+function FormAdd({
+    formData,
+    setFormData,
+    errorName,
+    errorDescription,
+    errorAddress,
+    // setIsVisibleMap,
+    // locationField
+}) {
 
     const onChange = (e, type) => {
         setFormData({ ...formData, [type]: e.nativeEvent.text })
@@ -210,10 +265,11 @@ function FormAdd({ formData, setFormData, errorName, errorDescription, errorAddr
                 rightIcon={{
                     type: "material-community",
                     name: "google-maps",
-                    color: "green",
-                    onPress: () => {
-                        setIsVisibleMap(true)
-                    }
+                    color: "green"
+                    // color: locationField ? "green" : "red",
+                    // onPress: () => {
+                    //     setIsVisibleMap(true)
+                    // }
                 }}
             />
 
