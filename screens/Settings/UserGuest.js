@@ -19,7 +19,7 @@ export default function UserGuest() {
       <Text style={styles.description}>¿Queres jugar y no tenes equipo? ¿Tenes equipo pero te falta uno? Encontralo aca</Text>
       <Button
         buttonStyle={styles.button}
-        title="Ver tu perfil"
+        title="Entrar a tu cuenta"
         onPress={() => navigation.navigate('login')}
       />
     </ScrollView>

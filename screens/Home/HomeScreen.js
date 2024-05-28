@@ -3,6 +3,51 @@ import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar';
 import { Datos } from '../../components/Products.js';
+import { Divider } from 'react-native-elements';
+
+
+
+export default function HomeScreen() {
+  return (
+
+    // Header //
+
+    <View style={style.container}>
+      <SafeAreaView style={style.safe}>
+        <View style={style.headerCont}>
+          <Text style={style.headerText}>
+            Buenos Aires, ARG
+          </Text>
+        </View>
+
+        {/* Search Bar */}
+
+        <View>
+          <View>
+            <TextInput placeholder='Buscar' style={style.searchBar} />
+          </View>
+        </View>
+      </SafeAreaView>
+
+      {/* Posts */}
+
+      <View style={style.container}>
+        <FlatList
+          data={Datos}
+          renderItem={({ item: Data }) => (
+            <View style={[style.posts, style.shadowProp]} key={Data.id}>
+              <Image style={style.postsImage} source={Data.img} />
+              <Text style={style.postsName}>{Data.name}</Text>
+              <Divider style={style.divider} />
+              <Text style={style.postsDescription}>{Data.texto}</Text>
+            </View>
+          )}
+        />
+      </View>
+
+    </View>
+  )
+}
 
 const style = StyleSheet.create({
   container: {
@@ -59,63 +104,13 @@ const style = StyleSheet.create({
     marginHorizontal: 10,
 
   },
-  postsLastName: {
-    marginBottom: 7,
-    marginHorizontal: 10,
-
-  },
-  postsFollowers: {
-    marginBottom: 7,
-    marginHorizontal: 10,
-
-  },
   postsDescription: {
     marginBottom: 20,
     marginHorizontal: 10,
 
+  },
+  divider: {
+    marginVertical: 10,
   }
 
 })
-
-export default function HomeScreen() {
-  return (
-
-    // Header //
-
-    <View style={style.container}>
-      <SafeAreaView style={style.safe}>
-        <View style={style.headerCont}>
-          <Text style={style.headerText}>
-            Buenos Aires, ARG
-          </Text>
-        </View>
-
-        {/* Search Bar */}
-
-        <View>
-          <View>
-            <TextInput placeholder='Buscar' style={style.searchBar} />
-          </View>
-        </View>
-      </SafeAreaView>
-
-      {/* Posts */}
-
-      <View style={style.container}>
-        <FlatList
-          data={Datos}
-          renderItem={({ item: Data }) => (
-            <View style={[style.posts, style.shadowProp]} key={Data.id}>
-              <Image style={style.postsImage} source={Data.img} />
-              <Text style={style.postsName}>Nombre: {Data.name}</Text>
-              <Text style={style.postsLastName}>Apellido: {Data.apellido}</Text>
-              <Text style={style.postsFollowers}>Seguidores: {Data.seguidores}</Text>
-              <Text style={style.postsDescription}>Descripcion: {Data.texto}</Text>
-            </View>
-          )}
-        />
-      </View>
-
-    </View>
-  )
-}

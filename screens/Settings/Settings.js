@@ -1,26 +1,26 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
+import { useFocusEffect } from '@react-navigation/native';
 
-import { firebaseApp } from '../../firebase';
-import firebase from 'firebase/compat/app';
-import 'firebase/compat/auth';
-import 'firebase/compat/firestore';
 
 import UserLogged from './UserLogged'
 import UserGuest from './UserGuest'
-import { isUserLogged } from '../../utils/actions';
+import Loading from './Login'
+
+import { getCurrentUser, isUserLogged } from '../../utils/actions';
 
 export default function Settings() {
-    const [login, setLoggin] = useState(null)
+    const [login, setLogin] = useState(null)
 
-    useEffect(() => {
-        setLoggin(isUserLogged)
-    })
+    useFocusEffect (
+        useCallback(() => {
+            const user = getCurrentUser()
+            user ? setLogin(true) : setLogin(false)
+        }, [])
+    )
 
     if (login == null) {
-        return (
-            <Text style={{ marginTop: 20 }}>Cargando...</Text>
-        );
+        return <Loading isVisible={true} text="Cargando..."/>
     }
     return login ? <UserLogged /> : <UserGuest />
 

@@ -1,23 +1,32 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Dimensions, ScrollView, Alert, Text, Image } from "react-native";
-import CountryPicker from "react-native-country-picker-modal";
+import { View, StyleSheet, Dimensions, ScrollView, Alert, Pressable, Image, Platform, Text, TouchableOpacity } from "react-native";
 import { Avatar, Button, Icon, Input } from "react-native-elements";
 import { map, size, filter, isEmpty, set } from "lodash";
+import MapView, { Marker } from "react-native-maps";
+import { format } from 'date-fns';
+
+import DateTimePicker from '@react-native-community/datetimepicker'
+import es from 'date-fns/locale/es';
+
 import { getCurrentLocation, loadImageFromGallery } from "../../utils/helpers";
 import Modal from "../../components/Modal"
-import MapView, { Marker } from "react-native-maps";
 
 const widthScreen = Dimensions.get("window").width
 
 export default function AddPostForm({ toastRef, setLoading, navigation }) {
-    const [formData, setFormData] = useState(defaultFormValues())
-    const [errorName, setErrorName] = useState(null)
-    const [errorDescription, setErrorDescription] = useState(null)
-    const [errorAddress, setErrorAddress] = useState(null)
-    const [imagesSelected, setImagesSelected] = useState([])
-    // const [isVisibleMap, setIsVisibleMap] = useState(false)
-    // const [locationField, setLocationField] = useState(null)
-
+    const [formData, setFormData] = useState(defaultFormValues());
+    const [errorName, setErrorName] = useState(null);
+    const [errorDescription, setErrorDescription] = useState(null);
+    const [errorAddress, setErrorAddress] = useState(null);
+    const [imagesSelected, setImagesSelected] = useState([]);
+    const [isVisibleMap, setIsVisibleMap] = useState(false);
+    const [locationField, setLocationField] = useState(null);
+    const [eventDate, setEventDate] = useState("");
+    const [eventTime, setEventTime] = useState("");
+    const [date, setDate] = useState(new Date());
+    const [time, setTime] = useState(new Date());
+    const [showPickerDate, setShowPickerDate] = useState(false);
+    const [showPickerTime, setShowPickerTime] = useState(false);
 
 
     const AddPost = () => {
@@ -43,10 +52,10 @@ export default function AddPostForm({ toastRef, setLoading, navigation }) {
             setErrorDescription("Debes ingresar una descripcion de la cancha");
             isValid = false;
         }
-        // if (!locationField) {
-        //     toastRef.current.show("Debes localizar la cancha en el mapa.", 3000);
-        //     isValid = false;
-        // } 
+        if (!locationField) {
+            toastRef.current.show("Debes localizar la cancha en el mapa.", 3000);
+            isValid = false;
+        }
         if (size(imagesSelected) === 0) {
             toastRef.current.show("Debes agregar al menos una imagen de la cancha.", 3000);
             isValid = false;
@@ -60,8 +69,6 @@ export default function AddPostForm({ toastRef, setLoading, navigation }) {
         setErrorAddress(null)
     }
 
-
-
     return (
         <ScrollView style={styles.containerView}>
             <ImageField
@@ -73,8 +80,20 @@ export default function AddPostForm({ toastRef, setLoading, navigation }) {
                 errorName={errorName}
                 errorDescription={errorDescription}
                 errorAddress={errorAddress}
-                // setIsVisibleMap={setIsVisibleMap}
-                // locationField={locationField}
+                setIsVisibleMap={setIsVisibleMap}
+                locationField={locationField}
+                date={date}
+                setDate={setDate}
+                time={time}
+                setTime={setTime}
+                showPickerTime={showPickerTime}
+                setShowPickerTime={setShowPickerTime}
+                showPickerDate={showPickerDate}
+                setShowPickerDate={setShowPickerDate}
+                eventDate={eventDate}
+                setEventDate={setEventDate}
+                eventTime={eventTime}
+                setEventTime={setEventTime}
             />
             <UploadImage
                 toastRef={toastRef}
@@ -86,75 +105,75 @@ export default function AddPostForm({ toastRef, setLoading, navigation }) {
                 onPress={AddPost}
                 buttonStyle={styles.btnAddPost}
             />
-            {/* <MapField
+            <MapField
                 isVisibleMap={isVisibleMap}
                 setIsVisibleMap={setIsVisibleMap}
                 locationField={locationField}
                 setLocationField={setLocationField}
                 toastRef={toastRef}
-            /> */}
+            />
         </ScrollView>
     );
 }
 
-// function MapField({ isVisibleMap, setIsVisibleMap, locationField, setLocationField, toastRef }) {
-//     const [newRegion, setNewRegion] = useState(null)
+function MapField({ isVisibleMap, setIsVisibleMap, locationField, setLocationField, toastRef }) {
+    const [newRegion, setNewRegion] = useState(null)
 
-//     useEffect(() => {
-//         (async () => {
-//             const response = await getCurrentLocation()
-//             if (response.status) {
-//                 setNewRegion(response.location)
-//             }
-//         })()
-//     }, [])
+    useEffect(() => {
+        (async () => {
+            const response = await getCurrentLocation()
+            if (response.status) {
+                setNewRegion(response.location)
+            }
+        })()
+    }, [])
 
-//     const confirmLocation = () => {
-//         setLocationField(newRegion)
-//         toastRef.current.show("Localizacion guardada correctamente", 3000)
-//         setIsVisibleMap(false)
-//     }
+    const confirmLocation = () => {
+        setLocationField(newRegion)
+        toastRef.current.show("Localizacion guardada correctamente", 3000)
+        setIsVisibleMap(false)
+    }
 
 
-//     return (
-//         <Modal isVisible={isVisibleMap} setVisible={setIsVisibleMap}>
-//             <View>
-//                 {
-//                     newRegion && (
-//                         <MapView
-//                             style={styles.mapStyle}
-//                             initialRegion={newRegion}
-//                             showsUserLocation={true}
-//                             onRegionChange={(region) => setNewRegion(region)}
-//                         >
-//                             <Marker
-//                                 coordinate={{
-//                                     latitude: newRegion.latitude,
-//                                     longitude: newRegion.longitude
-//                                 }}
-//                                 draggable
-//                             />
-//                         </MapView>
-//                     )
-//                 }
-//                 <View style={styles.viewMapButton} >
-//                     <Button
-//                         title="Guardar Ubicación"
-//                         containerStyle={styles.viewMapBtnContainerSave}
-//                         buttonStyle={styles.viewMapBtnSave}
-//                         onPress={confirmLocation}
-//                     />
-//                     <Button
-//                         title="Cancelar Ubicación"
-//                         containerStyle={styles.viewMapBtnContainerCancel}
-//                         buttonStyle={styles.viewMapBtnCancel}
-//                         onPress={() => setIsVisibleMap(false)}
-//                     />
-//                 </View>
-//             </View>
-//         </Modal>
-//     );
-// }
+    return (
+        <Modal isVisible={isVisibleMap} setVisible={setIsVisibleMap}>
+            <View>
+                {
+                    newRegion && (
+                        <MapView
+                            style={styles.mapStyle}
+                            initialRegion={newRegion}
+                            showsUserLocation={true}
+                            onRegionChange={(region) => setNewRegion(region)}
+                        >
+                            <Marker
+                                coordinate={{
+                                    latitude: newRegion.latitude,
+                                    longitude: newRegion.longitude
+                                }}
+                                draggable
+                            />
+                        </MapView>
+                    )
+                }
+                <View style={styles.viewMapButton} >
+                    <Button
+                        title="Guardar Ubicación"
+                        containerStyle={styles.viewMapBtnContainerSave}
+                        buttonStyle={styles.viewMapBtnSave}
+                        onPress={confirmLocation}
+                    />
+                    <Button
+                        title="Cancelar Ubicación"
+                        containerStyle={styles.viewMapBtnContainerCancel}
+                        buttonStyle={styles.viewMapBtnCancel}
+                        onPress={() => setIsVisibleMap(false)}
+                    />
+                </View>
+            </View>
+        </Modal>
+    );
+}
 
 function UploadImage({ toastRef, imagesSelected, setImagesSelected }) {
     const imageSelect = async () => {
@@ -241,13 +260,71 @@ function FormAdd({
     errorName,
     errorDescription,
     errorAddress,
-    // setIsVisibleMap,
-    // locationField
+    setIsVisibleMap,
+    locationField,
+    eventDate,
+    setEventDate,
+    eventTime,
+    setEventTime,
+    date,
+    setDate,
+    time,
+    setTime,
+    showPickerTime,
+    setShowPickerTime,
+    showPickerDate,
+    setShowPickerDate,
+
 }) {
 
     const onChange = (e, type) => {
         setFormData({ ...formData, [type]: e.nativeEvent.text })
     }
+
+    const selectedDate = new Date()
+
+
+    const onChangeDate = (event, selectedDate) => {
+        setShowPickerDate(Platform.OS === "ios");
+        if (selectedDate) {
+            const formattedDate = format(selectedDate, "dd MMMM yyyy", {
+                locale: es,
+            });
+            setDate(selectedDate);
+            setEventDate(formattedDate);
+        }
+    };
+
+    function toTimeStringWithoutSeconds(date) {
+        if (!(date instanceof Date)) {
+            throw new Error("Invalid date object");
+        }
+
+        const hours = date.getHours().toString().padStart(2, '0'); // Obtener las horas y asegurarse de que tenga dos dígitos
+        const minutes = date.getMinutes().toString().padStart(2, '0'); // Obtener los minutos y asegurarse de que tenga dos dígitos
+
+        return `${hours}:${minutes}`;
+    }
+
+    const selectedTime = new Date()
+    const formattedTimeWithoutSeconds = toTimeStringWithoutSeconds(selectedTime);
+
+    const onChangeTime = (event, selectedTime) => {
+        setShowPickerTime(Platform.OS === "ios");
+        if (selectedTime) {
+            const formattedTime = format(selectedTime, "HH:mm", { locale: es });
+            setTime(selectedTime);
+            setEventTime(formattedTime);
+        }
+    };
+
+    const showDatePicker = () => {
+        setShowPickerDate(true);
+    };
+
+    const showTimePicker = () => {
+        setShowPickerTime(true);
+    };
 
     return (
         <View style={styles.viewForm}>
@@ -265,14 +342,12 @@ function FormAdd({
                 rightIcon={{
                     type: "material-community",
                     name: "google-maps",
-                    color: "green"
-                    // color: locationField ? "green" : "red",
-                    // onPress: () => {
-                    //     setIsVisibleMap(true)
-                    // }
+                    color: locationField ? "green" : "red",
+                    onPress: () => {
+                        setIsVisibleMap(true)
+                    }
                 }}
             />
-
             <Input
                 placeholder="Descripción"
                 multiline
@@ -281,6 +356,141 @@ function FormAdd({
                 onChange={(e) => onChange(e, "description")}
                 errorMessage={errorDescription}
             />
+
+            <View>
+                {showPickerDate && (                //SET DATE
+                    <DateTimePicker
+                        mode="date"
+                        display="spinner"
+                        value={date}
+                        locale="es-ES"
+                        onChange={onChangeDate}
+                        style={styles.datePicker}
+                        timeZoneName={'America/Argentina/a'}
+
+                    />
+                )}
+                {showPickerDate && Platform.OS === 'ios' && (
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: "space-around"
+                        }}
+                    >
+                        <TouchableOpacity style={[
+                            styles.buttonDate,
+                            styles.pickerButton,
+                            { backgroundColor: '#11182711' }
+                        ]}
+                            onPress={() => setShowPickerDate(false)}                        >
+                            <Text
+                                style={[styles.buttonText,
+                                { color: "#075985" }
+                                ]}
+                            >Cancelar</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={[
+                            styles.buttonDate,
+                            styles.pickerButton,
+                        ]}
+                            onPress={() => {
+                                setShowPickerDate(false);
+                            }}
+                        >
+                            <Text
+                                style={[styles.buttonText,
+                                ]}
+                            >confirmar</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+
+                {showPickerTime && (        //SET TIME
+                    <DateTimePicker
+                        mode="time"
+                        display="spinner"
+                        value={date}
+                        locale="es-ES"
+                        onChange={onChangeTime}
+                        style={styles.datePicker}
+                        timeZoneName={'America/Argentina/a'}
+
+                    />
+                )}
+
+
+                {showPickerTime && Platform.OS === 'ios' && (
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: "space-around"
+                        }}
+                    >
+                        <TouchableOpacity style={[
+                            styles.buttonDate,
+                            styles.pickerButton,
+                            { backgroundColor: '#11182711' }
+                        ]}
+                            onPress={() => setShowPickerTime(false)}
+                        >
+                            <Text
+                                style={[styles.buttonText,
+                                { color: "#075985" }
+                                ]}
+                            >Cancelar</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={[
+                            styles.buttonDate,
+                            styles.pickerButton,
+                        ]}
+                            onPress={() => {
+                                setShowPickerTime(false);
+                            }}
+                        >
+                            <Text
+                                style={[styles.buttonText,
+                                ]}
+                            >confirmar</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+
+
+                {!showPickerDate && (
+                    <Pressable onPress={showDatePicker}>
+                        <Input
+                            placeholder={format(date, "dd MMMM yyyy", { locale: es })}
+                            value={eventDate}
+                            onChangeText={setEventDate}
+                            editable={false}
+                            rightIcon={{
+                                type: "font-awesome",
+                                name: "calendar",
+                                onPress: showDatePicker,
+                            }}
+                        />
+                    </Pressable>
+                )}
+
+                {!showPickerTime && (
+                    <Pressable onPress={showTimePicker}>
+                        <Input
+                            placeholder={format(time, "HH:mm", { locale: es })}
+                            value={eventTime}
+                            onChangeText={setEventTime}
+                            editable={false}
+                            rightIcon={{
+                                type: "font-awesome",
+                                name: "clock-o",
+                                onPress: showTimePicker,
+                            }}
+                        />
+                    </Pressable>
+                )}
+            </View>
+
         </View>
 
     );
@@ -297,6 +507,7 @@ function defaultFormValues() {
         callingCode: "54"
     }
 }
+
 const styles = StyleSheet.create({
     containerView: {
         height: '100%',
@@ -312,9 +523,6 @@ const styles = StyleSheet.create({
     phoneView: {
         width: '80%'
     },
-    // countryPicker: {
-
-    // },
     inputPhone: {
         width: '80%'
     },
@@ -366,9 +574,28 @@ const styles = StyleSheet.create({
     },
     viewMapBtnSave: {
         backgroundColor: "green"
+    },
+    datePicker: {
+        height: 120,
+        marginTop: -10
+    },
+    buttonDate: {
+        height: 20,
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 50,
+        marginTop: 10,
+        marginBottom: 15,
+        backgroundColor: '#075985'
+    },
+    pickerButton: {
+        paddingHorizontal: 20
+    },
+    buttonText: {
+        fontSize: 14,
+        fontWeight: "500",
+        color: '#fff'
     }
-
-
 })
 
 
